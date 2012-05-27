@@ -1,0 +1,127 @@
+h2 {
+    margin-bottom: 12px;
+}
+
+.media-drop-placeholder {
+    display: table-cell;
+    /* Scale 1.11 */
+    width: 310px;
+    height: 278px;
+    background-color: #e1e1e8;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.media-drop-placeholder-title {
+    font-weight: bold;
+    font-size: 20px;
+    color: #818177;
+}
+
+.media-drop-placeholder-or {
+    font-weight: normal;
+    font-size: 15px;
+    color: #818177;
+}
+
+.media-drop-placeholder > button {
+    position: relative;
+    display: inline-block;
+    margin-top: 18px;
+    width: 150px;
+}
+
+.media-drop-placeholder > button > input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+
+.media-drop-slider {
+    position: relative;
+    clear: left;
+    width: 310px;
+    height: 21px;
+    user-select: none;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.icon-small {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 9px;
+    height: 7px;
+}
+
+.icon-big {
+    position: absolute;
+    top: 5px;
+    right: 0;
+    width: 16px;
+    height: 12px;
+}
+
+.track {
+    position: absolute;
+    top: 9px;
+    height: 5px;
+    left: 19px;
+    right: 26px;
+}
+
+.track > .left {
+    background-image: url('../img/slider.png');
+    background-position: -6px -19px;
+    background-repeat: no-repeat;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+}
+
+.track > .middle {
+    background-image: url('../img/slider.png');
+    background-position: 0 -62px;
+    background-repeat: repeat-x;
+    position: absolute;
+    left: 3px;
+    top: 0;
+    right: 3px;
+    bottom: 0;
+}
+
+.track > .right {
+    background-image: url('../img/slider.png');
+    background-position: -3px -19px;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3px;
+}
+
+.sc-handle {
+    width: 19px;
+    height: 19px;
+    margin-left: -9px;
+    background: url('../img/slider.png') no-repeat 0 0;
+    display: block;
+    position: absolute;
+    top: -7px;
+    border: none;
+    cursor: default;
+}
+
+.sc-handle.active {
+    background-position: 0 -24px;
+}
