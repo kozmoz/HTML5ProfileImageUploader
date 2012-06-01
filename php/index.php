@@ -37,16 +37,16 @@
                 </div>
 
                 <!-- Slider -->
-                <div class="media-drop-slider" role="slider" aria-valuemax="100" aria-valuemin="0" aria-valuenow="14" aria-orientation="horizontal">
-                    <img class="icon-small" src="img/slider-small.png" width="9" height="7" alt=""/>
-                    <div class="track">
-                        <div class="left"></div>
-                        <div class="middle"></div>
-                        <div class="right"></div>
-                        <div class="sc-handle"></div>
-                    </div>
-                    <img class="icon-big" src="img/slider-big.png" width="16" height="12" alt=""/>
+                <?php
+                /*
+                <div class="clearfix"></div>
+                <div class="sliderblock">
+                    <input class="sliderblock-slider" name="slider" id="slider" type="range" min="0" max="100" value="0"/>
+                    <img class="sliderblock-icon-small" src="img/slider-small.png" width="9" height="7" alt=""/>
+                    <img class="sliderblock-icon-big" src="img/slider-big.png" width="16" height="12" alt=""/>
                 </div>
+                */
+                ?>
 
             </div>
         </div>
@@ -58,6 +58,5 @@
 <script src="js/jquery.html5uploader-1.0.js"></script>
 <script src="js/main.js"></script>
 
-<!-- Page rendered in 0.0557 seconds -->
 </body>
 </html>

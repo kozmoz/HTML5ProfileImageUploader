@@ -1,15 +1,12 @@
 ﻿/*!
  * jQuery HTML5 Uploader 1.0b
  *
- * http://www.igloolab.com/jquery-html5-uploader
- *
- * http://hacks.mozilla.org/2011/01/how-to-develop-a-html5-image-uploader/
+ * Based on:
+ * - http://www.igloolab.com/jquery-html5-uploader
+ * - http://hacks.mozilla.org/2011/01/how-to-develop-a-html5-image-uploader/
  */
 (function ($) {
     $.fn.html5Uploader = function (options) {
-        var crlf = '\r\n';
-        var boundary = "recipyrecipy";
-        var dashes = "--";
         var settings = {
             "name":"uploadedFile",
             "postUrl":"upload",
@@ -19,12 +16,12 @@
             "onServerLoad":null,
             "onServerLoadStart":null,
             "onServerProgress":null,
-            "onServerReadyStateChange":null};
+            "onServerReadyStateChange":null,
+            "cropRatio":1.11,
+            "maxlength":2048};
         if (options) {
             $.extend(settings, options);
         }
-
-        window.console && console.info('jquery.html5uploader.js: init()');
 
         // Add the dataTransfer property for use with the native `drop` event to capture information about files dropped into the browser window.
         jQuery.event.props.push("dataTransfer");
@@ -42,9 +39,10 @@
                 });
             } else {
 
-                //  The ondragover event needs to be canceled in Google Chrome and Safari to allow firing the ondrop event.
+                // The ondragover event needs to be canceled in Google Chrome and Safari to allow firing the ondrop event.
+                // Cancel drop events on body.
 
-                // Cancel drop events op de body.
+                // Toggle dragover class.
                 var hasDragoverClass = false;
                 $(document).on("dragover", '*', function (e) {
                     if (hasDragoverClass) {
@@ -56,13 +54,13 @@
                 // Zet "dragover" class op drop area.
                 $('body').on("dragover", originalSelector, function (e) {
                     if (!hasDragoverClass) {
-                        $this.addClass("dragover");
+                        $this.toggleClass("dragover", true);
                         hasDragoverClass = true;
                     }
                     return false;
                 });
 
-                // Drop van file afvangen.
+                // Catch file drop.
                 $this.bind("drop", function (e) {
                     // Max 1 file.
                     var files = e.dataTransfer.files;
@@ -74,54 +72,86 @@
             }
         });
 
-        // Handle upload van een enkele file.
-        function fileHandler(file) {
+        /**
+         * Handle upload of single file.
+         *
+         * @param droppedFile File object
+         */
+        function fileHandler(droppedFile) {
 
-            window.console && console.info("jquery.html5uploader.js: File dropped: ", file);
+            window.console && console.info("jquery.html5uploader.js: File dropped: ", droppedFile);
 
             // Make sure these files are actually images:
-            var isImage = file.type == 'image/jpeg' || file.type == 'image/png' || file.type == 'image/gif';
+            var isImage = droppedFile.type == 'image/jpeg' || droppedFile.type == 'image/png' || droppedFile.type == 'image/gif';
 
-            if (settings.onDrop) {
-                settings.onDrop(file, isImage);
-            }
-
-            // Afbreken als geen image.
+            // Abort if not an image.
             if (!isImage) {
-                window.console && console.info("jquery.html5uploader.js: Break, file is geen image: ", file.type);
+                window.console && console.info("jquery.html5uploader.js: Break, file is geen image: ", droppedFile.type);
+
+                if (settings.onDrop) {
+                    settings.onDrop(droppedFile, false);
+                }
                 return
             }
 
+            // Resize image and crop.
+            // Reference File object by URL from HTML.
+            var originalFileName = droppedFile.name;
+            var droppedImage = document.createElement("droppedImage");
+            droppedImage.onload = function () {
 
-            // Resize image.
-            //  Reference File object by URL from HTML.
-            var originalFileName = file.name;
-            var img = document.createElement("img");
-            img.onload = function () {
+                var droppedImageLoaded = this;
+                var originalWidth = droppedImageLoaded.width;
+                var originalHeight = droppedImageLoaded.height;
 
-                var img = this;
-                var ret = determineWidthAndHight2(img.width, img.height);
+                // Calculate width and height based on ratio.
+                var ret = determineCropWidthAndHight(settings.cropRatio, originalWidth, originalHeight);
+                var cropWidth = ret.width;
+                var cropHeight = ret.height;
 
-                window.console && console.info("Nieuwe afmetingen image: " + ret.width + ", " + ret.height);
+                // Determine if longest side exceeds max length.
+                ret = determineScaleWidthAndHight(settings.maxlength, cropWidth, cropHeight);
+                var scaleWidth = ret.width;
+                var scaleHeight = ret.height;
 
+                var scaleRatio = cropWidth / scaleWidth;
+
+                // Crop and scale.
                 var canvas = document.createElement("canvas");
-                canvas.width = ret.width;
-                canvas.height = ret.height;
+                canvas.width = scaleWidth;
+                canvas.height = scaleHeight;
                 var ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, ret.width, ret.height);
+                var x = -1 * (Math.round(((originalWidth - cropWidth) / 2) / scaleRatio));
+                var y = -1 * (Math.round(((originalHeight - cropHeight) / 2) / scaleRatio));
+                x = Math.min(0, x);
+                y = Math.min(0, y);
+                var w = Math.round(originalWidth / scaleRatio);
+                var h = Math.round(originalHeight / scaleRatio);
 
-                // Canvas omzetten naar een File
+                ctx.drawImage(droppedImageLoaded, x, y, w, h);
+
+                // Convert canvas to file.
                 var file = false;
-                if (canvas.mozGetAsFile) {
-                    file = canvas.mozGetAsFile(originalFileName, 'image/png');
+                if (canvas.toBlob) {
+                    // HTML5 implementation.
+                    // https://developer.mozilla.org/en/DOM/HTMLCanvasElement
+                    file = canvas.toBlob(null, 'image/jpeg', '0.9');
+                    file.name = originalFileName;
+                } else if (canvas.mozGetAsFile) {
+                    // Mozilla implementation.
+                    file = canvas.mozGetAsFile(originalFileName, 'image/jpeg', '0.9');
                 } else {
-                    // Webkit versie
+                    // Webkit implementation.
                     // http://stackoverflow.com/questions/4998908/convert-data-uri-to-file-then-append-to-formdata
-                    file = dataURItoBlob(canvas.toDataURL('image/png'));
+                    file = dataURItoBlob(canvas.toDataURL('image/jpeg', '0.9'));
                     file.name = originalFileName;
                 }
 
-                window.console && console.info("jquery.html5uploader.js: Resized file: ", file);
+
+                // Notify listeners of scaled and cropped image.
+                if (settings.onDrop) {
+                    settings.onDrop(file, isImage);
+                }
 
 
                 // Start upload.
@@ -138,7 +168,6 @@
                 };
                 xmlHttpRequest.upload.onload = function (e) {
                     if (settings.onServerLoad) {
-                        console.info("response1", xmlHttpRequest.responseText);
                         settings.onServerLoad(e, file, xmlHttpRequest.responseText);
                     }
                 };
@@ -162,94 +191,91 @@
                     }
                 };
 
-                // Todo: Alleen binary verzenden blijven gebruiken?
+                // Send image as binary file using HTTP PUT.
                 xmlHttpRequest.open("PUT", settings.postUrl, true);
-                if (file.getAsBinary) {
-
-                    window.console && console.info('file.getAsBinary');
-                    var data = dashes + boundary + crlf +
-                            "Content-Disposition: form-data;" +
-                            "name=\"" + settings.name + "\";" +
-                            "filename=\"" + unescape(encodeURIComponent(file.name)) + "\"" + crlf +
-                            "Content-Type: application/octet-stream" + crlf + crlf +
-                            file.getAsBinary() + crlf +
-                            dashes + boundary + dashes;
-                    xmlHttpRequest.setRequestHeader("Content-Type", "multipart/form-data;boundary=" + boundary);
-                    xmlHttpRequest.sendAsBinary(data);
-
-                } else if (false && window.FormData) {
-
-                    window.console && console.info('formdata');
-                    var formData = new FormData();
-                    formData.append(settings.name, file);
-                    xmlHttpRequest.send(formData);
-
-                } else {
-
-                    window.console && console.info('binary');
-                    xmlHttpRequest.send(file);
-//                    console.info("response sync: ", xmlHttpRequest.responseText);
-                }
-
-
+                xmlHttpRequest.send(file);
             };
 
             //  Reference File object by URL from HTML.
-            img.src = (window.URL || window.webkitURL).createObjectURL(file);
+            // (img.onload() continues after finished loading)
+            droppedImage.src = (window.URL || window.webkitURL).createObjectURL(droppedFile);
         }
+
+        /**
+         * Determine max width and height of image.
+         *
+         * @param width Originele breedte
+         * @param height Originele hoogte
+         * @return width en height
+         */
+        function determineScaleWidthAndHight(maxLength, width, height) {
+
+            if (width > height) {
+                if (width > maxLength) {
+                    height *= maxLength / width;
+                    width = maxLength;
+                }
+            } else {
+                if (height > maxLength) {
+                    width *= maxLength / height;
+                    height = maxLength;
+                }
+            }
+            return {width:width, height:height};
+        }
+
+        /**
+         * Determine max width and height based on fixed x/y ratio.
+         *
+         * @param width Original width
+         * @param height Original height
+         * @return new width and height (input for cropping)
+         */
+        function determineCropWidthAndHight(ratio, width, height) {
+
+            var currentRatio = width / height;
+            if (currentRatio != ratio) {
+                if (currentRatio > ratio) {
+                    // Cut x
+                    width = Math.round(height * ratio);
+                } else {
+                    // Cut y
+                    height = Math.round(width / ratio);
+                }
+            }
+
+            return {width:width, height:height};
+        }
+
+        /**
+         * Convert Webkit dataURI to Blob.
+         */
+        function dataURItoBlob(dataURI, callback) {
+            // convert base64/URLEncoded data component to raw binary data held in a string
+            var byteString;
+            if (dataURI.split(',')[0].indexOf('base64') >= 0) {
+                byteString = atob(dataURI.split(',')[1]);
+            } else {
+                byteString = unescape(dataURI.split(',')[1]);
+            }
+
+            // separate out the mime component
+            var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+            // write the bytes of the string to an ArrayBuffer
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            // write the ArrayBuffer to a blob, and you're done
+            var bb = new (window.BlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder)();
+            bb.append(ab);
+            return bb.getBlob(mimeString);
+        }
+
     };
 })(jQuery);
 
 
-/**
- * Bepaal max breedte ne hoogte van image.
- *
- * @param width Originele breedte
- * @param height Originele hoogte
- * @return width en height
- */
-function determineWidthAndHight2(width, height) {
-
-    var MAX_WIDTH = 1024;
-    var MAX_HEIGHT = 1024;
-
-
-    if (width > height) {
-        if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-        }
-    } else {
-        if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-        }
-    }
-    return {width:width, height:height};
-}
-
-
-function dataURItoBlob(dataURI, callback) {
-    // convert base64/URLEncoded data component to raw binary data held in a string
-    var byteString;
-    if (dataURI.split(',')[0].indexOf('base64') >= 0) {
-        byteString = atob(dataURI.split(',')[1]);
-    } else {
-        byteString = unescape(dataURI.split(',')[1]);
-    }
-
-    // separate out the mime component
-    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
-
-    // write the bytes of the string to an ArrayBuffer
-    var ab = new ArrayBuffer(byteString.length);
-    var ia = new Uint8Array(ab);
-    for (var i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-    }
-
-    // write the ArrayBuffer to a blob, and you're done
-    var bb = new (window.BlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder)();
-    bb.append(ab);
-    return bb.getBlob(mimeString);
-}
