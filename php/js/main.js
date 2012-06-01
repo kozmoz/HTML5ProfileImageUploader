@@ -5,10 +5,15 @@ $(document).ready(function () {
 
         postUrl:'/recipy/myrecipes/upload',
 
+        onDrop:function () {
+            $('.media-drop-placeholder *').hide();
+            $('.media-drop-placeholder').toggleClass('busyloading', true).css('cursor', 'progress');
+        },
+
         /**
-         * Image geladen in de browser.
+         * Image cropped and scaled.
          */
-        onDrop:function (file, isImage) {
+        onProcessed:function (file, isImage) {
             if (isImage) {
 
                 // Als image geladen is, meteen tonen in placeholder.
@@ -17,7 +22,7 @@ $(document).ready(function () {
                     var img = this;
                     img.width = 310;
                     img.height = 278;
-                    $('.media-drop-placeholder').hide().after(img);
+                    $('.media-drop-placeholder').removeClass('busyloading').css('cursor', 'auto').hide().after(img);
                 };
 
                 //  Reference File object by URL from HTML.

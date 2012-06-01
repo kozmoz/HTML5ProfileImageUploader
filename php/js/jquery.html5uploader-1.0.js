@@ -13,6 +13,7 @@
             "name":"uploadedFile",
             "postUrl":"upload",
             "onDrop":null,
+            "onProcessed":null,
             "onServerAbort":null,
             "onServerError":null,
             "onServerLoad":null,
@@ -85,6 +86,11 @@
 
             window.console && console.info("jquery.html5uploader.js: File dropped: ", droppedFile);
 
+            // Notify listener.
+            if (settings.onDrop) {
+                settings.onDrop();
+            }
+
             // Make sure these files are actually images:
             var isImage = droppedFile.type == 'image/jpeg' || droppedFile.type == 'image/png' || droppedFile.type == 'image/gif';
 
@@ -92,8 +98,8 @@
             if (!isImage) {
                 window.console && console.info("jquery.html5uploader.js: Break, file is geen image: ", droppedFile.type);
 
-                if (settings.onDrop) {
-                    settings.onDrop(droppedFile, false);
+                if (settings.onProcessed) {
+                    settings.onProcessed(droppedFile, false);
                 }
                 return
             }
@@ -153,8 +159,8 @@
 
 
                 // Notify listeners of scaled and cropped image.
-                if (settings.onDrop) {
-                    settings.onDrop(file, isImage);
+                if (settings.onProcessed) {
+                    settings.onProcessed(file, isImage);
                 }
 
 
