@@ -1,6 +1,8 @@
 ﻿/*!
  * jQuery HTML5 Uploader 1.0b
  *
+ * https://github.com/kozmoz/HTML5ProfileImageUploader
+ *
  * Based on:
  * - http://www.igloolab.com/jquery-html5-uploader
  * - http://hacks.mozilla.org/2011/01/how-to-develop-a-html5-image-uploader/
@@ -67,6 +69,8 @@
                     if (files.length > 0) {
                         fileHandler(files[0]);
                     }
+
+                    $this.removeClass("dragover");
                     return false;
                 });
             }
@@ -97,7 +101,7 @@
             // Resize image and crop.
             // Reference File object by URL from HTML.
             var originalFileName = droppedFile.name;
-            var droppedImage = document.createElement("droppedImage");
+            var droppedImage = document.createElement("img");
             droppedImage.onload = function () {
 
                 var droppedImageLoaded = this;
