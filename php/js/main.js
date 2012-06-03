@@ -35,6 +35,7 @@ $(document).ready(function () {
                         $(this).hide().off('.deletebtn');
                         $('.media-drop-placeholder *').show();
                         $('.media-drop-placeholder').show().next('img').remove();
+                        return false;
                     });
                 };
 
