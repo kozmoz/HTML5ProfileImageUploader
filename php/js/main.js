@@ -16,6 +16,9 @@ $(document).ready(function () {
         onProcessed:function (file, isImage) {
             if (isImage) {
 
+                // Remove possible previously loaded image.
+                $('.media-drop img').remove();
+
                 // Als image geladen is, meteen tonen in placeholder.
                 var img = document.createElement("img");
                 img.onload = function () {
@@ -23,6 +26,13 @@ $(document).ready(function () {
                     img.width = 310;
                     img.height = 278;
                     $('.media-drop-placeholder').removeClass('busyloading').css('cursor', 'auto').hide().after(img);
+
+                    // Show and activate delete button.
+                    $('.media-drop > button.delete').show().on('click.deletebtn', function () {
+                        $(this).hide().off('.deletebtn');
+                        $('.media-drop-placeholder *').show();
+                        $('.media-drop-placeholder').show().next('img').remove();
+                    });
                 };
 
                 //  Reference File object by URL from HTML.

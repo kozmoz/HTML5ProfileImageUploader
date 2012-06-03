@@ -2,8 +2,19 @@ h2 {
     margin-bottom: 12px;
 }
 
-.dragover {
+.media-drop {
+    position: relative;
+}
+
+.media-drop.dragover {
     border-color: orange;
+}
+
+.media-drop > button.close {
+    display: none;
+    position: absolute;
+    right: 8px;
+    top: 4px;
 }
 
 .media-drop-placeholder {

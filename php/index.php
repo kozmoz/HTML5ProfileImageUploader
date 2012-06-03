@@ -26,6 +26,7 @@
 
                 <!-- Drop media. -->
                 <div class="media-drop thumbnail pull-left">
+                    <button class="close delete" data-dismiss="alert">×</button>
                     <div class="media-drop-placeholder">
                         <span class="media-drop-placeholder-title">Drop image here</span>
                         <span class="media-drop-placeholder-or">or</span>
