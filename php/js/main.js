@@ -5,6 +5,9 @@ $(document).ready(function () {
 
         postUrl:'/recipy/myrecipes/upload',
 
+        /**
+         * File dropped / selected.
+         */
         onDrop:function () {
             $('.media-drop-placeholder *').hide();
             $('.media-drop-placeholder').toggleClass('busyloading', true).css('cursor', 'progress');

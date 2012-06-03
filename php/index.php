@@ -30,9 +30,9 @@
                     <div class="media-drop-placeholder">
                         <span class="media-drop-placeholder-title">Drop image here</span>
                         <span class="media-drop-placeholder-or">or</span>
-                        <button class="btn btn-success">Browse files...
+                        <button class="btn btn-primary">Browse files...
                             <!-- Verstop input[type=file] in een "gewone" button. -->
-                            <input type="file"/>
+                            <input name="media-drop-placeholder-file" type="file"/>
                         </button>
                     </div>
                 </div>

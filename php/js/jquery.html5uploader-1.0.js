@@ -33,10 +33,15 @@
         return this.each(function (options) {
             var $this = $(this);
             if ($this.is("[type='file']")) {
-                $this.bind("change", function () {
+                $this.parent().on('change', 'input', function () {
                     // Max 1 file.
                     var files = this.files;
                     if (files.length > 0) {
+
+                        // Reset file input by redrawing it.
+                        // http://gusiev.com/2009/04/clear-upload-file-input-field/
+                        $(this).parent().html($(this).parent().html());
+
                         fileHandler(files[0]);
                     }
                 });
