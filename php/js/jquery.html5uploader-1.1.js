@@ -173,6 +173,13 @@
                 ctx.save();
                 transformCoordinate(canvas, scaleWidth, scaleHeight, orientation);
             }
+            var subsampled = detectSubsampling(img);
+            if (subsampled) {
+                w /= 2;
+                h /= 2;
+                x /= 2;
+                y /= 2;
+            }
 
             ctx.drawImage(img, x, y, w, h);
             ctx.restore();
@@ -187,6 +194,53 @@
             settings.onProcessed && settings.onProcessed(canvas);
 
             return canvas;
+        }
+
+        /**
+         * Detect subsampling in loaded image.
+         * In iOS, larger images than 2M pixels may be subsampled in rendering.
+         */
+        function detectSubsampling(img) {
+            var iw = img.naturalWidth, ih = img.naturalHeight;
+            if (iw * ih > 1024 * 1024) { // subsampling may happen over megapixel image
+                var canvas = document.createElement('canvas');
+                canvas.width = canvas.height = 1;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, -iw + 1, 0);
+                // subsampled image becomes half smaller in rendering size.
+                // check alpha channel value to confirm image is covering edge pixel or not.
+                // if alpha value is 0 image is not covering, hence subsampled.
+                return ctx.getImageData(0, 0, 1, 1).data[3] === 0;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * Detecting vertical squash in loaded image.
+         * Fixes a bug which squash image vertically while drawing into canvas for some images.
+         */
+        function detectVerticalSquash(img, iw, ih) {
+            var canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = ih;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            var data = ctx.getImageData(0, 0, 1, ih).data;
+            // search image edge pixel position in case it is squashed vertically.
+            var sy = 0;
+            var ey = ih;
+            var py = ih;
+            while (py > sy) {
+                var alpha = data[(py - 1) * 4 + 3];
+                if (alpha === 0) {
+                    ey = py;
+                } else {
+                    sy = py;
+                }
+                py = (ey + sy) >> 1;
+            }
+            return py / ih;
         }
 
         /**
