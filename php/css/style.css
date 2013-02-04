@@ -2,6 +2,10 @@ h2 {
     margin-bottom: 12px;
 }
 
+.error {
+    color: red;
+}
+
 .media-drop {
     position: relative;
 }
@@ -37,12 +41,14 @@ h2 {
 }
 
 .media-drop-placeholder-title {
+    display: block;
     font-weight: bold;
     font-size: 20px;
     color: #818177;
 }
 
 .media-drop-placeholder-or {
+    display: block;
     font-weight: normal;
     font-size: 15px;
     color: #818177;
@@ -62,39 +68,25 @@ h2 {
     opacity: 0;
 }
 
-.sliderblock {
+.media-drop-placeholder-uploadbutton {
+    display: block;
     position: relative;
-    width: 320px;
-    height: 20px;
-    padding: 0 36px 0 28px;
-    margin: 10px 0 0 0;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
-    box-sizing: border-box;
 }
 
-.sliderblock-icon-small {
-    display: block;
+/* Fake stylable upload button. */
+.media-drop-placeholder-uploadbutton > button {
+    position: relative;
+    width: 130px;
+}
+
+/* Real upload button. */
+.media-drop-placeholder-uploadbutton > input {
     position: absolute;
-    top: 6px;
-    left: 2px;
-    width: 9px;
-    height: 7px;
-}
-
-.sliderblock-icon-big {
-    display: block;
-    position: absolute;
-    top: 3px;
-    right: 2px;
-    width: 16px;
-    height: 12px;
-}
-
-.sliderblock-slider {
-    width: 100%;
-    padding: 0;
-    margin: 0;
+    top: 0;
+    opacity: 0;
+    z-index: 1;
+    width: 130px;
+    max-width: 130px;
+    overflow: hidden;
 }
 

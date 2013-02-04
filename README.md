@@ -1,16 +1,16 @@
-Profile image upload widget
-===========================
+HTML5 Image uploader
+====================
 
 Introduction
 ------------
 
-Profile image upload widget is an HTML5 widget for uploading a (profile) image. The image is cropped at the predefined perspective and scaled to fit best automatically. If the user is not satisfied with the proposed result, it can adjusted the result with full flexibility .Scaling and cropping is done client side at the browser. The scaled version of the image is uploaded to the server through an AJAX call.
+jQuery plugin to crop, scale and upload an image. It croppes the image at the predefined perspective (if desired) and scales it down to fit best automatically. If the user is not satisfied with the proposed result, it can adjusted the result with full flexibility. For efficientness, cropping and scaling is performed client side at the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's possibilities, available in every modern browser.
 
 Key features
 ------------
 
 * Ease of use
-* Mminimal interaction
+* Minimal interaction
 * Fast
 
 Demo
@@ -31,6 +31,9 @@ Profile image upload widget has been successfully tested in the following browse
 
 Changes
 -------
-Version 1.0 (2012-05-27)
+Version 1.1 (2013-02-03)
+* Added iOS6 Safari support
+* Fixes iOS6 Safari's image file rendering issue for large size image
 
+Version 1.0 (2012-05-27)
 * Initial release

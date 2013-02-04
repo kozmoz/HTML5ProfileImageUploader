@@ -7,7 +7,7 @@
 
     <title>HTML5 Image Uploader</title>
 
-    <link href="css/bootstrap-2.0.3.min.css" rel="stylesheet" type="text/css"/>
+    <link href="css/bootstrap-2.2.2.min.css" rel="stylesheet" type="text/css"/>
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
 </head>
@@ -24,30 +24,24 @@
             <div class="span12">
                 <h2>Online Demo</h2>
 
-                <!-- Drop media. -->
-                <div class="media-drop thumbnail pull-left">
-                    <button class="close delete" data-dismiss="alert">×</button>
-                    <div class="media-drop-placeholder">
-                        <span class="media-drop-placeholder-title">Drop image here</span>
-                        <span class="media-drop-placeholder-or">or</span>
-                        <button class="btn btn-primary">Browse files...
-                            <!-- Verstop input[type=file] in een "gewone" button. -->
-                            <input name="media-drop-placeholder-file" type="file"/>
-                        </button>
-                    </div>
-                </div>
+                <div id="droppedimage">Image</div>
 
-                <!-- Slider -->
-                <?php
-                /*
-                <div class="clearfix"></div>
-                <div class="sliderblock">
-                    <input class="sliderblock-slider" name="slider" id="slider" type="range" min="0" max="100" value="0"/>
-                    <img class="sliderblock-icon-small" src="img/slider-small.png" width="9" height="7" alt=""/>
-                    <img class="sliderblock-icon-big" src="img/slider-big.png" width="16" height="12" alt=""/>
+                <div class="photo-placeholder">
+                    <!-- Drop media. -->
+                    <div class="media-drop">
+                        <div class="media-drop-placeholder">
+                            <span class="media-drop-placeholder-title">Drop image here</span>
+                            <span class="media-drop-placeholder-or">or</span>
+
+                            <div class="media-drop-placeholder-uploadbutton">
+                                <?php /* Verstop input[type=file] in een "gewone" button.*/ ?>
+                                <input id="realUploadBtn" name="media-drop-placeholder-file" type="file" accept="image/*" tabindex="-1"/>
+                                <button id="uploadBtn" type="button" class="btn" tabindex="-1">Browse file&hellip;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="help-block error errormessages"></p>
                 </div>
-                */
-                ?>
 
             </div>
         </div>
@@ -55,8 +49,10 @@
     </section>
 </div>
 
-<script src="js/jquery-1.7.2.min.js"></script>
-<script src="js/jquery.html5uploader-1.0.js"></script>
+<script src="js/jquery-1.9.0.min.js"></script>
+<script src="js/jquery.html5uploader-1.1.js"></script>
+<script src="js/megapix-image-1.0.js"></script>
+<script src="js/exif.js"></script>
 <script src="js/main.js"></script>
 
 </body>
