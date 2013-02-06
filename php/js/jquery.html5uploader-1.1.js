@@ -131,27 +131,29 @@
          */
         function scaleAndCropImage(img) {
 
-            var orientation = $(img).data('orientation');
-
+            var cropRatio = settings.cropRatio;
             var originalWidth = img.width;
             var originalHeight = img.height;
 
-            // 90 degrees CW or CCW, flip width ans height.
+            // 90 degrees CW or CCW, flip width and height.
+            var orientation = $(img).data('orientation');
             switch (orientation) {
                 case 5:
                 case 6:
                 case 7:
                 case 8:
-                    originalWidth = img.height;
-                    originalHeight = img.width;
+                    cropRatio = 1 / cropRatio;
                     break;
                 default:
             }
 
-            // Calculate width and height based on configures X/Y ratio.
-            var ret = determineCropWidthAndHeight(settings.cropRatio, originalWidth, originalHeight);
+            // Calculate width and height based on desired X/Y ratio.
+            var ret = determineCropWidthAndHeight(cropRatio, originalWidth, originalHeight);
             var cropWidth = ret.width;
             var cropHeight = ret.height;
+
+            window.console && console.info("originalWidth: " + originalWidth + ", originalHeight: " + originalHeight);
+            window.console && console.info("cropWidth: " + cropWidth + ", cropHeight: " + cropHeight);
 
             // Determine if longest side exceeds max length.
             ret = determineScaleWidthAndHeight(settings.maxLength, cropWidth, cropHeight);
@@ -159,10 +161,9 @@
             var scaleHeight = ret.height;
             var scaleRatio = cropWidth / scaleWidth;
 
+            window.console && console.info("scaleWidth: " + scaleWidth + ", scaleHeight: " + scaleHeight);
+
             // Crop and scale.
-            var canvas = document.createElement("canvas");
-            canvas.width = scaleWidth;
-            canvas.height = scaleHeight;
             var x = -1 * (Math.round(((originalWidth - cropWidth) / 2) / scaleRatio));
             var y = -1 * (Math.round(((originalHeight - cropHeight) / 2) / scaleRatio));
             x = Math.min(0, x);
@@ -170,9 +171,26 @@
             var w = Math.round(originalWidth / scaleRatio);
             var h = Math.round(originalHeight / scaleRatio);
 
+            var canvas = document.createElement("canvas");
+
+            // Bepaal de breedte an hoogte, gebaseerd op orientatie.
+            switch (orientation) {
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    canvas.width = scaleHeight;
+                    canvas.height = scaleWidth;
+                    break;
+                default:
+                    canvas.width = scaleWidth;
+                    canvas.height = scaleHeight;
+            }
+
             var ctx = canvas.getContext("2d");
             if (orientation) {
-                transformCoordinate(ctx, orientation);
+                // Transform canvas coordination according to specified frame size and orientation.
+                transformCoordinate(ctx, orientation, scaleWidth, scaleHeight);
             }
 
             // var subsampled = detectSubsampling(img);
@@ -185,21 +203,6 @@
             }
 
             window.console && console.log('x=' + x + ", y=" + y + ", w=" + w + ", h=" + h);
-
-            // 90 degrees CW or CCW, flip width ans height.
-            switch (orientation) {
-                case 5:
-                case 6:
-                    var tmpX = x;
-                    var tmpH = h;
-                    x = y;
-                    y = -tmpX - 80;
-                    h = w;
-                    w = tmpH;
-                case 7:
-                case 8:
-                default:
-            }
 
             ctx.drawImage(img, x, y, w, h);
 
@@ -292,28 +295,15 @@
         }
 
         /**
-         * Transform canvas coordination according to specified frame size and orientation
-         * Orientation value is from EXIF tag
+         * Transform canvas coordination according to specified frame size and orientation.
+         * Orientation value is from EXIF tag.
          *
          * @param ctx HTMLCanvasElement.context Canvas
          * @param orientation EXIF orientation code
+         * @param width Number Width
+         * @param height Number Height
          */
-        function transformCoordinate(ctx, orientation) {
-            var canvas = ctx.canvas;
-            var width = canvas.width;
-            var height = canvas.height;
-
-            console.log(width, height);
-            switch (orientation) {
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                    //canvas.width = height;
-                    //canvas.height = width;
-                    break;
-                default:
-            }
+        function transformCoordinate(ctx, orientation, width, height) {
             switch (orientation) {
                 case 1:
                     // nothing
