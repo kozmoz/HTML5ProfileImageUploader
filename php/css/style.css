@@ -1,3 +1,7 @@
+body {
+    background-color: #bc8f8f;
+}
+
 h2 {
     margin-bottom: 12px;
 }
@@ -54,20 +58,6 @@ h2 {
     color: #818177;
 }
 
-.media-drop-placeholder > button {
-    position: relative;
-    display: inline-block;
-    margin-top: 18px;
-    width: 150px;
-}
-
-.media-drop-placeholder > button > input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-}
-
 .media-drop-placeholder-uploadbutton {
     display: block;
     position: relative;
@@ -79,11 +69,15 @@ h2 {
     width: 130px;
 }
 
-/* Real upload button. */
+/* Real upload button, centered */
 .media-drop-placeholder-uploadbutton > input {
     position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
     top: 0;
-    opacity: 0;
+    opacity: .5;
     z-index: 1;
     width: 130px;
     max-width: 130px;

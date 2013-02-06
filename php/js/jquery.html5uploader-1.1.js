@@ -132,27 +132,31 @@
         function scaleAndCropImage(img) {
 
             var orientation = $(img).data('orientation');
-            window.console && console.log('scaling: Orientation: ' + orientation);
 
             var originalWidth = img.width;
             var originalHeight = img.height;
 
-            window.console && console.info("Original width, height: " + originalWidth + ", " + originalHeight);
+            // 90 degrees CW or CCW, flip width ans height.
+            switch (orientation) {
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    originalWidth = img.height;
+                    originalHeight = img.width;
+                    break;
+                default:
+            }
 
-            // Calculate width and height based on ratio.
+            // Calculate width and height based on configures X/Y ratio.
             var ret = determineCropWidthAndHeight(settings.cropRatio, originalWidth, originalHeight);
             var cropWidth = ret.width;
             var cropHeight = ret.height;
-
-            window.console && console.info("Cropped width, height: " + cropWidth + ", " + cropHeight);
 
             // Determine if longest side exceeds max length.
             ret = determineScaleWidthAndHeight(settings.maxLength, cropWidth, cropHeight);
             var scaleWidth = ret.width;
             var scaleHeight = ret.height;
-
-            window.console && console.info("Scaled width, height: " + scaleWidth + ", " + scaleHeight);
-
             var scaleRatio = cropWidth / scaleWidth;
 
             // Crop and scale.
@@ -166,14 +170,13 @@
             var w = Math.round(originalWidth / scaleRatio);
             var h = Math.round(originalHeight / scaleRatio);
 
-            // Todo: draai image gebaseerd op EXIF info
-            // Todo: fix iOS6 bug
             var ctx = canvas.getContext("2d");
             if (orientation) {
-                ctx.save();
-                transformCoordinate(canvas, scaleWidth, scaleHeight, orientation);
+                transformCoordinate(ctx, orientation);
             }
-            var subsampled = detectSubsampling(img);
+
+            // var subsampled = detectSubsampling(img);
+            var subsampled = false;
             if (subsampled) {
                 w /= 2;
                 h /= 2;
@@ -181,14 +184,30 @@
                 y /= 2;
             }
 
+            window.console && console.log('x=' + x + ", y=" + y + ", w=" + w + ", h=" + h);
+
+            // 90 degrees CW or CCW, flip width ans height.
+            switch (orientation) {
+                case 5:
+                case 6:
+                    var tmpX = x;
+                    var tmpH = h;
+                    x = y;
+                    y = -tmpX - 80;
+                    h = w;
+                    w = tmpH;
+                case 7:
+                case 8:
+                default:
+            }
+
             ctx.drawImage(img, x, y, w, h);
-            ctx.restore();
 
-            window.console && console.info("x, y: " + x + ", " + y);
-            window.console && console.info("w, h: " + w + ", " + h);
-
-            // Todo: draai image gebaseerd op EXIF info
-            // Todo: fix iOS6 bug
+            var vertSquashScale = detectVerticalSquash2(ctx);
+            if (false && vertSquashScale < 1) {
+                // Redraw image, doubling the hight seems to fix the issue.
+                ctx.drawImage(img, x, y, w, h * 2);
+            }
 
             // Notify listeners of scaled and cropped image.
             settings.onProcessed && settings.onProcessed(canvas);
@@ -219,15 +238,18 @@
         /**
          * Detecting vertical squash in loaded image.
          * Fixes a bug which squash image vertically while drawing into canvas for some images.
+         *
+         * @return vertical squash scale
          */
-        function detectVerticalSquash(img, iw, ih) {
+        function detectVerticalSquash(img, ih) {
             var canvas = document.createElement('canvas');
             canvas.width = 1;
             canvas.height = ih;
             var ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
+            // Returns pixel data for the specified rectangle.
             var data = ctx.getImageData(0, 0, 1, ih).data;
-            // search image edge pixel position in case it is squashed vertically.
+            // Search image edge pixel position in case it is squashed vertically.
             var sy = 0;
             var ey = ih;
             var py = ih;
@@ -244,24 +266,54 @@
         }
 
         /**
+         * Detecting vertical squash in loaded image.
+         * Fixes a bug which squash image vertically while drawing into canvas for some images.
+         *
+         * @param ctx HTMLCanvasElement Canvas
+         * @return Number Vertical squash scale
+         */
+        function detectVerticalSquash2(ctx) {
+            var canvas = ctx.canvas;
+            var height = canvas.height;
+
+            // Returns pixel data for the specified rectangle.
+            var data = ctx.getImageData(0, 0, 1, height).data;
+
+            // Search image edge pixel position in case it is squashed vertically.
+            var i = height;
+            for (; i > 0; i--) {
+                var alphaPixel = data[((i - 1) * 4) + 3];
+                if (alphaPixel > 0) {
+                    break;
+                }
+            }
+
+            return i / height;
+        }
+
+        /**
          * Transform canvas coordination according to specified frame size and orientation
          * Orientation value is from EXIF tag
+         *
+         * @param ctx HTMLCanvasElement.context Canvas
+         * @param orientation EXIF orientation code
          */
-        function transformCoordinate(canvas, width, height, orientation) {
+        function transformCoordinate(ctx, orientation) {
+            var canvas = ctx.canvas;
+            var width = canvas.width;
+            var height = canvas.height;
+
             console.log(width, height);
             switch (orientation) {
                 case 5:
                 case 6:
                 case 7:
                 case 8:
-                    canvas.width = height;
-                    canvas.height = width;
+                    //canvas.width = height;
+                    //canvas.height = width;
                     break;
                 default:
-                    canvas.width = width;
-                    canvas.height = height;
             }
-            var ctx = canvas.getContext('2d');
             switch (orientation) {
                 case 1:
                     // nothing

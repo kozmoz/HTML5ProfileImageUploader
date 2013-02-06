@@ -31,6 +31,7 @@ $(document).ready(function () {
 
                 // Show new image.
                 $('#droppedimage').empty().append(newImg);
+                $(newImg).css('border', '1px solid red');
 
             } else {
 
