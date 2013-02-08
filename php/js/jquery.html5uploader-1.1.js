@@ -19,14 +19,15 @@
 
             // Settings.
             "postUrl": "upload",
-            "cropRatio": 1.11,
+            "cropRatio": 800 / 600,
             "maxLength": 800,
             "imageUrl": "image",
 
             // Callbacks.
             "onDropped": null /* Returns boolean (true = accepted, type is image) */,
             "onProcessed": null /* Returns Canvas(success) or null */,
-            "onUploaded": null /* Returns boolean(success), responseText */ };
+            "onUploaded": null /* Returns boolean(success), responseText */
+        };
 
         if (options) {
             $.extend(settings, options);
@@ -36,72 +37,71 @@
         jQuery.event.props.push("dataTransfer");
 
         var originalSelector = this.selector;
-        return this.each(function () {
-            var $this = $(this);
+        this.each(function () {
+            var $dropElement = $(this);
+
+            // The ondragover event needs to be canceled in Google Chrome and Safari to allow firing the ondrop event.
+            // Cancel drop events on body.
+
+            // Toggle dragover class.
+            var hasDragoverClass = false;
+            $(document).on("dragover", '*', function () {
+                if (hasDragoverClass) {
+                    $dropElement.removeClass("dragover");
+                    hasDragoverClass = false;
+                }
+                return false;
+            });
+
+            // Put "dragover" class at drop area.
+            $('body').on("dragover", originalSelector, function () {
+                if (!hasDragoverClass) {
+                    $dropElement.toggleClass("dragover", true);
+                    hasDragoverClass = true;
+                }
+                return false;
+            });
+
+            // Catch file drop.
+            $dropElement.bind("drop", function (e) {
+
+                // Returns FileList.
+                // https://developer.mozilla.org/en-US/docs/DOM/FileList
+                var files = e.dataTransfer.files;
+                if (files.length > 0) {
+
+                    // Max 1 file.
+                    createImageFromFile(files[0]);
+                } else {
+                    // Image URL gedropt (Drag'n Drop in Chrome tussen tabbladen).
+                    var imageUrl = e.dataTransfer.getData("URL");
+                    if (imageUrl) {
+                        imageUrl = settings.imageUrl + '?url=' + encodeURIComponent(imageUrl);
+                        createImageFromUrl(imageUrl);
+                    }
+                }
+
+                $dropElement.removeClass("dragover");
+                return false;
+            });
 
             // Attach listener to <input type=file>
-            if ($this.is("[type='file']")) {
-                $this.parent().on('change', 'input', function () {
+            $dropElement.find('input[type="file"]').parent().on('change', 'input', function () {
 
-                    // Returns FileList.
-                    // https://developer.mozilla.org/en-US/docs/DOM/FileList
-                    var files = this.files;
-                    if (files.length > 0) {
+                // Returns FileList.
+                // https://developer.mozilla.org/en-US/docs/DOM/FileList
+                var files = this.files;
+                if (files.length > 0) {
 
-                        // Reset file input by redrawing it.
-                        // http://gusiev.com/2009/04/clear-upload-file-input-field/
-                        $(this).parent().html($(this).parent().html());
+                    // Reset file input by redrawing it.
+                    // http://gusiev.com/2009/04/clear-upload-file-input-field/
+                    $(this).parent().html($(this).parent().html());
 
-                        // Max 1 file.
-                        startProcess(files);
-                    }
-                });
-            } else {
+                    // Max 1 file.
+                    startProcess(files);
+                }
+            });
 
-                // The ondragover event needs to be canceled in Google Chrome and Safari to allow firing the ondrop event.
-                // Cancel drop events on body.
-
-                // Toggle dragover class.
-                var hasDragoverClass = false;
-                $(document).on("dragover", '*', function () {
-                    if (hasDragoverClass) {
-                        $this.removeClass("dragover");
-                        hasDragoverClass = false;
-                    }
-                    return false;
-                });
-                // Zet "dragover" class op drop area.
-                $('body').on("dragover", originalSelector, function () {
-                    if (!hasDragoverClass) {
-                        $this.toggleClass("dragover", true);
-                        hasDragoverClass = true;
-                    }
-                    return false;
-                });
-
-                // Catch file drop.
-                $this.bind("drop", function (e) {
-
-                    // Returns FileList.
-                    // https://developer.mozilla.org/en-US/docs/DOM/FileList
-                    var files = e.dataTransfer.files;
-                    if (files.length > 0) {
-
-                        // Max 1 file.
-                        createImageFromFile(files[0]);
-                    } else {
-                        // Image URL gedropt (Drag'n Drop in Chrome tussen tabbladen).
-                        var imageUrl = e.dataTransfer.getData("URL");
-                        if (imageUrl) {
-                            imageUrl = settings.imageUrl + '?url=' + encodeURIComponent(imageUrl);
-                            createImageFromUrl(imageUrl);
-                        }
-                    }
-
-                    $this.removeClass("dragover");
-                    return false;
-                });
-            }
         });
 
         /**
@@ -206,9 +206,11 @@
 
             ctx.drawImage(img, x, y, w, h);
 
-            var vertSquashScale = detectVerticalSquash2(ctx);
-            if (false && vertSquashScale < 1) {
-                // Redraw image, doubling the hight seems to fix the issue.
+            var transparent = detectTransparancy(ctx);
+            window.alert('transparent: ' + transparent);
+
+            if (transparent) {
+                // Redraw image, doubling the height seems to fix the issue.
                 ctx.drawImage(img, x, y, w, h * 2);
             }
 
@@ -242,14 +244,12 @@
          * Detecting vertical squash in loaded image.
          * Fixes a bug which squash image vertically while drawing into canvas for some images.
          *
-         * @return vertical squash scale
+         * @return Number vertical squash scale
          */
-        function detectVerticalSquash(img, ih) {
-            var canvas = document.createElement('canvas');
-            canvas.width = 1;
-            canvas.height = ih;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
+        function detectVerticalSquash(ctx) {
+            var canvas = ctx.canvas;
+            var ih = canvas.height;
+
             // Returns pixel data for the specified rectangle.
             var data = ctx.getImageData(0, 0, 1, ih).data;
             // Search image edge pixel position in case it is squashed vertically.
@@ -269,13 +269,13 @@
         }
 
         /**
-         * Detecting vertical squash in loaded image.
+         * Detect transparency.
          * Fixes a bug which squash image vertically while drawing into canvas for some images.
          *
          * @param ctx HTMLCanvasElement Canvas
-         * @return Number Vertical squash scale
+         * @return Boolean True als transparent
          */
-        function detectVerticalSquash2(ctx) {
+        function detectTransparancy(ctx) {
             var canvas = ctx.canvas;
             var height = canvas.height;
 
@@ -286,12 +286,38 @@
             var i = height;
             for (; i > 0; i--) {
                 var alphaPixel = data[((i - 1) * 4) + 3];
+                if (alphaPixel == 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Detecting vertical squash in loaded image.
+         * Fixes a bug which squash image vertically while drawing into canvas for some images.
+         *
+         * @param ctx HTMLCanvasElement Canvas
+         * @return Number Vertical squash scale
+         */
+        function detectVerticalSquash3(ctx) {
+            var canvas = ctx.canvas;
+            var height = canvas.height;
+
+            // Returns pixel data for the specified rectangle.
+            var data = ctx.getImageData(0, 0, 1, height).data;
+
+            // Search image edge pixel position in case it is squashed vertically.
+            var i = 1;
+            for (; i < height; i++) {
+                var alphaPixel = data[((i - 1) * 4) + 3];
                 if (alphaPixel > 0) {
                     break;
                 }
             }
 
-            return i / height;
+            return (height - i) / height;
         }
 
         /**
@@ -574,5 +600,122 @@
                 return bb.getBlob(mimeString);
             }
         }
+
+        // Return settings object to allow modifications @runtime.
+        return settings;
     };
+
 })(jQuery);
+
+
+var BinaryFile = function (strData, iDataOffset, iDataLength) {
+    var data = strData;
+    var dataOffset = iDataOffset || 0;
+    var dataLength = 0;
+
+    this.getRawData = function () {
+        return data;
+    }
+
+    if (typeof strData == "string") {
+        dataLength = iDataLength || data.length;
+
+        this.getByteAt = function (iOffset) {
+            return data.charCodeAt(iOffset + dataOffset) & 0xFF;
+        }
+
+        this.getBytesAt = function (iOffset, iLength) {
+            var aBytes = [];
+
+            for (var i = 0; i < iLength; i++) {
+                aBytes[i] = data.charCodeAt((iOffset + i) + dataOffset) & 0xFF
+            }
+
+
+            return aBytes;
+        }
+    } else if (typeof strData == "unknown") {
+        dataLength = iDataLength || IEBinary_getLength(data);
+
+        this.getByteAt = function (iOffset) {
+            return IEBinary_getByteAt(data, iOffset + dataOffset);
+        }
+
+        this.getBytesAt = function (iOffset, iLength) {
+            return new VBArray(IEBinary_getBytesAt(data, iOffset + dataOffset, iLength)).toArray();
+        }
+    }
+
+    this.getLength = function () {
+        return dataLength;
+    }
+
+    this.getSByteAt = function (iOffset) {
+        var iByte = this.getByteAt(iOffset);
+        if (iByte > 127)
+            return iByte - 256;
+        else
+            return iByte;
+    }
+
+    this.getShortAt = function (iOffset, bBigEndian) {
+        var iShort = bBigEndian ?
+            (this.getByteAt(iOffset) << 8) + this.getByteAt(iOffset + 1)
+            : (this.getByteAt(iOffset + 1) << 8) + this.getByteAt(iOffset);
+        if (iShort < 0)
+            iShort += 65536;
+        return iShort;
+    };
+
+    this.getSShortAt = function (iOffset, bBigEndian) {
+        var iUShort = this.getShortAt(iOffset, bBigEndian);
+        if (iUShort > 32767)
+            return iUShort - 65536;
+        else
+            return iUShort;
+    };
+
+    this.getLongAt = function (iOffset, bBigEndian) {
+        var iByte1 = this.getByteAt(iOffset),
+            iByte2 = this.getByteAt(iOffset + 1),
+            iByte3 = this.getByteAt(iOffset + 2),
+            iByte4 = this.getByteAt(iOffset + 3);
+
+        var iLong = bBigEndian ?
+            (((((iByte1 << 8) + iByte2) << 8) + iByte3) << 8) + iByte4
+            : (((((iByte4 << 8) + iByte3) << 8) + iByte2) << 8) + iByte1;
+        if (iLong < 0)
+            iLong += 4294967296;
+        return iLong;
+    };
+
+    this.getSLongAt = function (iOffset, bBigEndian) {
+        var iULong = this.getLongAt(iOffset, bBigEndian);
+        if (iULong > 2147483647)
+            return iULong - 4294967296;
+        else
+            return iULong;
+    };
+
+    this.getStringAt = function (iOffset, iLength) {
+        var aStr = [];
+
+        var aBytes = this.getBytesAt(iOffset, iLength);
+        for (var j = 0; j < iLength; j++) {
+            aStr[j] = String.fromCharCode(aBytes[j]);
+        }
+        return aStr.join("");
+    };
+
+    this.getCharAt = function (iOffset) {
+        return String.fromCharCode(this.getByteAt(iOffset));
+    };
+
+    this.toBase64 = function () {
+        return window.btoa(data);
+    };
+
+    this.fromBase64 = function (strBase64) {
+        data = window.atob(strBase64);
+    }
+};

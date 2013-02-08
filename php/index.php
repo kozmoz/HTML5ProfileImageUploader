@@ -7,7 +7,7 @@
 
     <title>HTML5 Image Uploader</title>
 
-    <link href="css/bootstrap-2.2.2.min.css" rel="stylesheet" type="text/css"/>
+    <link href="css/bootstrap-2.3.min.css" rel="stylesheet" type="text/css"/>
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
 </head>
@@ -17,16 +17,43 @@
     <section id="global">
         <div class="page-header">
             <h1>HTML5 image uploader
-                <small>scale image client side</small>
+                <small>crop and scale image client side</small>
             </h1>
         </div>
         <div class="row">
             <div class="span12">
+
+                <p>
+                    jQuery plugin to crop, scale and upload an image. It croppes the image at the predefined perspective and scales it down to fit best automatically. For efficientness, cropping and scaling is performed client side at the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's possibilities, available in
+                    every modern browser.
+                </p>
+
+                <p>
+                    <a href="http://www.juurlink.org/todo/">http://www.juurlink.org/todo/</a>
+                </p>
+
                 <h2>Online Demo</h2>
 
-                <div id="droppedimage">Image</div>
+                <form>
+                    <fieldset>
+                        <label>Target image size in pixels</label>
+                        <label class="radio">
+                            <input type="radio" name="targetsize" value="800,600" checked="checked"> 800 x 600
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="targetsize" value="800,800"> 800 x 800
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="targetsize" value="600,800"> 600 x 800
+                        </label>
+                    </fieldset>
+                </form>
 
                 <div class="photo-placeholder">
+
+                    <!-- Image placeholder. -->
+                    <div id="droppedimage"></div>
+
                     <!-- Drop media. -->
                     <div class="media-drop">
                         <div class="media-drop-placeholder">
@@ -40,6 +67,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Error message placeholder. -->
                     <p class="help-block error errormessages"></p>
                 </div>
 
@@ -51,7 +79,6 @@
 
 <script src="js/jquery-1.9.0.min.js"></script>
 <script src="js/jquery.html5uploader-1.1.js"></script>
-<script src="js/megapix-image-1.0.js"></script>
 <script src="js/exif.js"></script>
 <script src="js/main.js"></script>
 
