@@ -49,33 +49,38 @@
                     </fieldset>
                 </form>
 
-                <div class="photo-placeholder">
+                <!-- Drop media element. -->
+                <div class="media-drop">
 
                     <!-- Image placeholder. -->
                     <div id="droppedimage"></div>
 
-                    <!-- Drop media. -->
-                    <div class="media-drop">
-                        <div class="media-drop-placeholder">
-                            <span class="media-drop-placeholder-title">Drop image here</span>
-                            <span class="media-drop-placeholder-or">or</span>
+                    <div id="dropbox" class="media-drop-placeholder">
+                        <span class="media-drop-placeholder-title">Drop image here</span>
+                        <span class="media-drop-placeholder-or">or</span>
 
-                            <div class="media-drop-placeholder-uploadbutton">
-                                <?php /* Verstop input[type=file] in een "gewone" button.*/ ?>
-                                <input id="realUploadBtn" name="media-drop-placeholder-file" type="file" accept="image/*" tabindex="-1"/>
-                                <button id="uploadBtn" type="button" class="btn" tabindex="-1">Browse file&hellip;</button>
-                            </div>
+                        <div class="media-drop-placeholder-uploadbutton">
+                            <?php /* Verstop input[type=file] in een "gewone" button.*/ ?>
+                            <input id="realUploadBtn" name="media-drop-placeholder-file" type="file" accept="image/*" tabindex="-1"/>
+                            <button id="uploadBtn" type="button" class="btn" tabindex="-1">Browse file&hellip;</button>
                         </div>
                     </div>
-                    <!-- Error message placeholder. -->
-                    <p class="help-block error errormessages"></p>
                 </div>
+                <!-- Error message placeholder. -->
+                <p class="help-block error errormessages"></p>
 
+                <button id="resetupload" type="button" class="btn">Upload new image</button>
             </div>
         </div>
         <!-- /.row -->
     </section>
 </div>
+
+<footer class="footer">
+    <div class="container">
+        <p>Built with all the love in the world.</p>
+    </div>
+</footer>
 
 <script src="js/jquery-1.9.0.min.js"></script>
 <script src="js/jquery.html5uploader-1.1.js"></script>

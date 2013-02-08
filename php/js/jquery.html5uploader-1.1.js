@@ -18,15 +18,16 @@
         var settings = {
 
             // Settings.
-            "postUrl": "upload",
-            "cropRatio": 800 / 600,
-            "maxLength": 800,
-            "imageUrl": "image",
+            postUrl: "upload",
+            cropRatio: 800 / 600,
+            maxLength: 800,
+            imageUrl: "image",
 
             // Callbacks.
-            "onDropped": null /* Returns boolean (true = accepted, type is image) */,
-            "onProcessed": null /* Returns Canvas(success) or null */,
-            "onUploaded": null /* Returns boolean(success), responseText */
+            onDropped: null /* Returns boolean (true = accepted, type is image) */,
+            onProcessed: null /* Returns Canvas(success) or null */,
+            onUploaded: null /* Returns boolean (true = success), responseText */,
+            onUploadProgress: null /* Progress during upload, in percentage .*/
         };
 
         if (options) {
@@ -46,6 +47,7 @@
             // Toggle dragover class.
             var hasDragoverClass = false;
             $(document).on("dragover", '*', function () {
+                window.console && console.log('dragover on body');
                 if (hasDragoverClass) {
                     $dropElement.removeClass("dragover");
                     hasDragoverClass = false;
@@ -55,6 +57,7 @@
 
             // Put "dragover" class at drop area.
             $('body').on("dragover", originalSelector, function () {
+                window.console && console.log('dragover on ' + originalSelector);
                 if (!hasDragoverClass) {
                     $dropElement.toggleClass("dragover", true);
                     hasDragoverClass = true;
@@ -65,13 +68,15 @@
             // Catch file drop.
             $dropElement.bind("drop", function (e) {
 
+                window.console && console.log('drop on ' + this);
+
                 // Returns FileList.
                 // https://developer.mozilla.org/en-US/docs/DOM/FileList
                 var files = e.dataTransfer.files;
                 if (files.length > 0) {
 
                     // Max 1 file.
-                    createImageFromFile(files[0]);
+                    startProcess(files[0]);
                 } else {
                     // Image URL gedropt (Drag'n Drop in Chrome tussen tabbladen).
                     var imageUrl = e.dataTransfer.getData("URL");
@@ -98,7 +103,7 @@
                     $(this).parent().html($(this).parent().html());
 
                     // Max 1 file.
-                    startProcess(files);
+                    startProcess(files[0]);
                 }
             });
 
@@ -107,17 +112,17 @@
         /**
          * Start the process of scaling, cropping and uploading.
          *
-         * @param files FileList
+         * @param file File
          */
-        function startProcess(files) {
+        function startProcess(file) {
             var success = createImageFromFile(function () {
                 var canvas = scaleAndCropImage(this);
                 var blob = convertCanvasToBlob(canvas);
 
-                // Todo: upload.
-                //realUploadImage(blob);
+                // Upload to server.
+                realUploadImage(blob);
 
-            }, files[0] /* Single file. */);
+            }, file);
 
             // Notify listeners.
             settings.onDropped && settings.onDropped(success);
@@ -201,10 +206,8 @@
             ctx.drawImage(img, x, y, w, h);
 
             var transparent = detectTransparancy(ctx);
-            window.alert('transparent: ' + transparent);
-
             if (transparent) {
-                // Redraw image, doubling the height seems to fix the issue.
+                // Redraw image, doubling the height seems to fix the iOS6 issue.
                 ctx.drawImage(img, x, y, w, h * 2);
             }
 
@@ -381,16 +384,17 @@
             // Send image as binary file using HTTP PUT.
             xmlHttpRequest.open("PUT", settings.postUrl, true /* async */);
             var requestTimer = setTimeout(function () {
+
+                // Timeout uploading.
                 xmlHttpRequest.abort();
-                if (settings.onUploadFail) {
-                    settings.onUploadFail()
-                }
+                settings.onUploaded && settings.onUploaded(false);
+
             }, MAXIMUM_WAITING_TIME);
 
-            // Send progress notifications.
-            xmlHttpRequest.upload.onprogress = function (e) {
-                if (e.lengthComputable && settings.onUploadProgress) {
-                    var percentComplete = evt.loaded / evt.total;
+            // Send progress notifications, 0...100%.
+            xmlHttpRequest.upload.onprogress = function (evt) {
+                if (evt.lengthComputable && settings.onUploadProgress) {
+                    var percentComplete = Math.round((evt.loaded / evt.total) * 100);
                     settings.onUploadProgress(percentComplete);
                 }
             };
@@ -403,16 +407,9 @@
                     // Cancel timeout.
                     clearTimeout(requestTimer);
 
-                    if (xhReq.status == 200) {
-                        // Success.
-                        if (settings.onUploadSuccess) {
-                            settings.onUploadSuccess(this.responseText)
-                        }
-                    } else {
-                        // No success.
-                        if (settings.onUploadFail) {
-                            settings.onUploadFail(this.responseText)
-                        }
+                    if (settings.onUploaded) {
+                        var success = (xmlHttpRequest.status == 200);
+                        settings.onUploaded(success, this.responseText)
                     }
                 }
             };
