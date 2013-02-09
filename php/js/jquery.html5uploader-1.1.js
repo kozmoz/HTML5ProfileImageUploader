@@ -198,14 +198,14 @@
             }
 
             // For now just a white background, in the future possibly background color based on dominating image color?
-            ctx.fillStyle = "rgb(255,255,255)";
+            ctx.fillStyle = "rgba(255,255,255, 0)";
             ctx.fillRect(0, 0, scaleWidth, scaleHeight);
             ctx.drawImage(img, x, y, w, h);
 
             var transparent = detectTransparancy(ctx);
             if (transparent) {
                 // Redraw image, doubling the height seems to fix the iOS6 issue.
-                ctx.drawImage(img, x, y, w, h * 2);
+                ctx.drawImage(img, x, y, w, h * 2.041);
             }
 
             // Notify listeners of scaled and cropped image.
@@ -272,18 +272,29 @@
         function detectTransparancy(ctx) {
             var canvas = ctx.canvas;
             var height = canvas.height;
+            var width = canvas.width;
 
             // Returns pixel data for the specified rectangle.
             var data = ctx.getImageData(0, 0, 1, height).data;
 
             // Search image edge pixel position in case it is squashed vertically.
-            var i = height;
-            for (; i > 0; i--) {
-                var alphaPixel = data[((i - 1) * 4) + 3];
+            for (var i = 0; i < height; i++) {
+                var alphaPixel = data[(i * 4) + 3];
                 if (alphaPixel == 0) {
                     return true;
                 }
             }
+
+//            // Returns pixel data for the specified rectangle.
+//            data = ctx.getImageData(0, 0, width, 1).data;
+//
+//            // Search image edge pixel position in case it is squashed vertically.
+//            for (i=0; i < width; i++) {
+//                alphaPixel = data[(i * 4) + 3];
+//                if (alphaPixel == 0) {
+//                    return true;
+//                }
+//            }
 
             return false;
         }
