@@ -203,8 +203,10 @@
             ctx.fillRect(0, 0, scaleWidth, scaleHeight);
             ctx.drawImage(img, x, y, w, h);
 
+            // Try to fix IOS6s image squash bug.
             // Test for transparency. This trick only works with JPEGs.
-            if ($img.data('fileType') == 'image/jpeg') {
+            var iOS = navigator.userAgent.match(/(iPad|iPhone|iPod)/i);
+            if (iOS && $img.data('fileType') == 'image/jpeg') {
                 var transparent = detectTransparency(ctx);
                 if (transparent) {
                     // Redraw image, doubling the height seems to fix the iOS6 issue.
