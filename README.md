@@ -4,7 +4,11 @@ HTML5 Image uploader
 Introduction
 ------------
 
-jQuery plugin to crop, scale and upload an image. It croppes the image at the predefined perspective (if desired) and scales it down to fit best automatically. For efficientness, cropping and scaling is performed client side at the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's possibilities, available in every modern browser.
+HTML5 Image uploader is a jQuery plugin to crop, scale and upload an image. It croppes the selected image at the predefined
+perspective and scales it down to fit best automatically. For efficiency, cropping and scaling is performed at the client
+side in the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's
+possibilities, available in every modern browser.
+
 
 Key features
 ------------
@@ -23,7 +27,7 @@ http://www.juurlink.org/todo/
 
 Compatibility
 -------------
-Profile image upload widget has been successfully tested in the following browsers:
+It has been successfully tested in the following browsers:
 
 * Chrome 19+
 * Safari 5.1+
