@@ -5,10 +5,9 @@ Introduction
 ------------
 
 HTML5 Image uploader is a jQuery plugin to crop, scale and upload an image. It croppes the selected image at the predefined
-perspective and scales it down to fit best automatically. For efficiency, cropping and scaling is performed at the client
+perspective and scales it down to fit automatically. For efficiency, cropping and scaling is performed at the client
 side in the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's
 possibilities, available in every modern browser.
-
 
 Key features
 ------------
