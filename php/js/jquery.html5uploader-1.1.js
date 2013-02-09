@@ -47,7 +47,6 @@
             // Toggle dragover class.
             var hasDragoverClass = false;
             $(document).on("dragover", '*', function () {
-                window.console && console.log('dragover on body');
                 if (hasDragoverClass) {
                     $dropElement.removeClass("dragover");
                     hasDragoverClass = false;
@@ -57,7 +56,6 @@
 
             // Put "dragover" class at drop area.
             $('body').on("dragover", originalSelector, function () {
-                window.console && console.log('dragover on ' + originalSelector);
                 if (!hasDragoverClass) {
                     $dropElement.toggleClass("dragover", true);
                     hasDragoverClass = true;
@@ -67,9 +65,6 @@
 
             // Catch file drop.
             $dropElement.bind("drop", function (e) {
-
-                window.console && console.log('drop on ' + this);
-
                 // Returns FileList.
                 // https://developer.mozilla.org/en-US/docs/DOM/FileList
                 var files = e.dataTransfer.files;
@@ -124,8 +119,6 @@
                 realUploadImage(blob);
             };
 
-            window.console && console.log('Parameter type: ' + (typeof fileOrUrl));
-
             var success = false;
             if (typeof fileOrUrl == 'string') {
                 // Parameter type is URL (at least is isn't a file).
@@ -168,16 +161,11 @@
             var cropWidth = ret.width;
             var cropHeight = ret.height;
 
-            window.console && console.info("originalWidth: " + originalWidth + ", originalHeight: " + originalHeight);
-            window.console && console.info("cropWidth: " + cropWidth + ", cropHeight: " + cropHeight);
-
             // Determine if longest side exceeds max length.
             ret = determineScaleWidthAndHeight(settings.maxLength, cropWidth, cropHeight);
             var scaleWidth = ret.width;
             var scaleHeight = ret.height;
             var scaleRatio = cropWidth / scaleWidth;
-
-            window.console && console.info("scaleWidth: " + scaleWidth + ", scaleHeight: " + scaleHeight);
 
             // Crop and scale.
             var x = -1 * (Math.round(((originalWidth - cropWidth) / 2) / scaleRatio));
@@ -208,8 +196,6 @@
                 // Transform canvas coordination according to specified frame size and orientation.
                 transformCoordinate(ctx, orientation, scaleWidth, scaleHeight);
             }
-
-            window.console && console.log('x=' + x + ", y=" + y + ", w=" + w + ", h=" + h);
 
             // For now just a white background, in the future possibly background color based on dominating image color?
             ctx.fillStyle = "rgb(255,255,255)";
@@ -430,6 +416,28 @@
         }
 
         /**
+         * Parse JPEG EXIF data, store EXIF orientation in 'data' property.
+         *
+         * @param dataUrl string Binary Image data
+         * @param img HTMLImageElement Image
+         */
+        function parseJpegExifOrientation(dataUrl, img) {
+            try {
+                var byteString = atob(dataUrl.split(',')[1]);
+                var binaryFile = new EXIF.BinaryFile(byteString, 0, byteString.length);
+                var exif = EXIF.findEXIFinJPEG(binaryFile);
+
+                // Store EXIF orientation (if available) in data property.
+                if (exif && exif['Orientation']) {
+                    $(img).data('orientation', exif['Orientation']);
+                }
+            } catch (e) {
+                // Error parsing EXIF data.
+                window.console && console.log('Error loading EXIF data', e);
+            }
+        }
+
+        /**
          * Convert File to image object.
          *
          * @param callback Callback to call when image successfully loaded
@@ -437,8 +445,6 @@
          * @return boolean True if type is image, false otherwise
          */
         function createImageFromFile(callback, file) {
-
-            window.console && console.log('createImageFromFile: file=', file);
 
             // Make sure these files are actually images:
             var isImage = file.type == 'image/jpeg' || file.type == 'image/png' || file.type == 'image/gif';
@@ -453,16 +459,13 @@
                 var reader = new FileReader();
                 reader.onload = (function (pImg) {
                     return function (e) {
+                        var dataUrl = e.target.result;
                         pImg.onload = callback;
-                        pImg.src = e.target.result;
+                        pImg.src = dataUrl;
 
-                        var byteString = atob(e.target.result.split(',')[1]);
-                        var binaryFile = new EXIF.BinaryFile(byteString, 0, byteString.length);
-                        var exif = EXIF.findEXIFinJPEG(binaryFile);
-
-                        window.console.log("Rotation: ", exif);
-                        window.console.log("Rotation: ", exif['Orientation']);
-                        $(pImg).data('orientation', exif['Orientation']);
+                        if (file.type == 'image/jpeg') {
+                            parseJpegExifOrientation(dataUrl, pImg);
+                        }
                     };
                 })(img);
                 reader.readAsDataURL(file);
@@ -485,9 +488,6 @@
          * @return boolean True if type is image, false otherwise
          */
         function createImageFromUrl(callback, imageUrl) {
-
-            window.console && console.log('createImageFromUrl: url=', imageUrl);
-
             //  Reference File object by URL from HTML.
             // (img.onload() continues after finished loading)
             var img = document.createElement("img");
@@ -596,8 +596,6 @@
 
             // Detect if Blob object is supported.
             if (typeof Blob !== 'undefined') {
-
-                window.console.log('mime:', mimeString);
                 return new Blob([buf], {type: mimeString});
 
             } else {
