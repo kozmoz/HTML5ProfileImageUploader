@@ -82,7 +82,7 @@
                     var imageUrl = e.dataTransfer.getData("URL");
                     if (imageUrl) {
                         imageUrl = settings.imageUrl + '?url=' + encodeURIComponent(imageUrl);
-                        createImageFromUrl(imageUrl);
+                        startProcess(imageUrl);
                     }
                 }
 
@@ -112,17 +112,26 @@
         /**
          * Start the process of scaling, cropping and uploading.
          *
-         * @param file File
+         * @param fileOrUrl File or image
          */
-        function startProcess(file) {
-            var success = createImageFromFile(function () {
+        function startProcess(fileOrUrl) {
+            var callback = function () {
                 var canvas = scaleAndCropImage(this);
                 var blob = convertCanvasToBlob(canvas);
 
                 // Upload to server.
                 realUploadImage(blob);
+            };
 
-            }, file);
+            window.console && console.log('Parameter type: ' + (typeof fileOrUrl));
+
+            var success = false;
+            if (typeof fileOrUrl == 'string') {
+                // Parameter type is URL.
+                success = createImageFromUrl(callback, fileOrUrl);
+            } else {
+                success = createImageFromFile(callback, fileOrUrl);
+            }
 
             // Notify listeners.
             settings.onDropped && settings.onDropped(success);
@@ -427,6 +436,8 @@
          */
         function createImageFromFile(callback, file) {
 
+            window.console && console.log('createImageFromFile: file=', file);
+
             // Make sure these files are actually images:
             var isImage = file.type == 'image/jpeg' || file.type == 'image/png' || file.type == 'image/gif';
             if (!isImage) {
@@ -468,10 +479,12 @@
          * Convert File to image object.
          *
          * @param callback Callback to call when image successfully loaded
-         * @param imageUrl Data URL of "echte" URL
+         * @param imageUrl Data URL or "real" URL
          * @return boolean True if type is image, false otherwise
          */
         function createImageFromUrl(callback, imageUrl) {
+
+            window.console && console.log('createImageFromUrl: url=', imageUrl);
 
             //  Reference File object by URL from HTML.
             // (img.onload() continues after finished loading)

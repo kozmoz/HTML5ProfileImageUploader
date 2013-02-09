@@ -10,6 +10,7 @@ $(document).ready(function () {
     var settings = $(".media-drop").html5Uploader({
 
         postUrl: 'upload.php',
+        imageUrl: 'image.php',
 
         /**
          * File dropped / selected.

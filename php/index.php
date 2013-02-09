@@ -60,7 +60,7 @@
                         <span class="media-drop-placeholder-or">or</span>
 
                         <div class="media-drop-placeholder-uploadbutton">
-                            <?php /* Verstop input[type=file] in een "gewone" button.*/ ?>
+                            <?php /* Put hidden input[type=file] above ordinary button.*/ ?>
                             <input id="realUploadBtn" name="media-drop-placeholder-file" type="file" accept="image/*" tabindex="-1"/>
                             <button id="uploadBtn" type="button" class="btn" tabindex="-1">Browse file&hellip;</button>
                         </div>
