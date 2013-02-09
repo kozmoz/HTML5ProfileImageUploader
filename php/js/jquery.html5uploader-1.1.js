@@ -81,6 +81,7 @@
                     // Image URL gedropt (Drag'n Drop in Chrome tussen tabbladen).
                     var imageUrl = e.dataTransfer.getData("URL");
                     if (imageUrl) {
+                        // Bypass Cross-Origin Resource Sharing.
                         imageUrl = settings.imageUrl + '?url=' + encodeURIComponent(imageUrl);
                         startProcess(imageUrl);
                     }
@@ -127,9 +128,10 @@
 
             var success = false;
             if (typeof fileOrUrl == 'string') {
-                // Parameter type is URL.
+                // Parameter type is URL (at least is isn't a file).
                 success = createImageFromUrl(callback, fileOrUrl);
             } else {
+                // Parameter type file.
                 success = createImageFromFile(callback, fileOrUrl);
             }
 

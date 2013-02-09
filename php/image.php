@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Bypass Cross-Origin Resource Sharing.
+ */
+
 $imageUrl = isset($_GET['url']) ? $_GET['url'] : '';
 
 if (empty($imageUrl)) {
