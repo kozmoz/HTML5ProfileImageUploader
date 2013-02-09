@@ -145,7 +145,8 @@
             var originalHeight = img.height;
 
             // 90 degrees CW or CCW, flip width and height.
-            var orientation = $(img).data('orientation');
+            var $img = $(img);
+            var orientation = $img.data('orientation') || 0;
             switch (orientation) {
                 case 5:
                 case 6:
@@ -202,10 +203,13 @@
             ctx.fillRect(0, 0, scaleWidth, scaleHeight);
             ctx.drawImage(img, x, y, w, h);
 
-            var transparent = detectTransparancy(ctx);
-            if (transparent) {
-                // Redraw image, doubling the height seems to fix the iOS6 issue.
-                ctx.drawImage(img, x, y, w, h * 2.041);
+            // Test for transparency. This trick only works with JPEGs.
+            if ($img.data('fileType') == 'image/jpeg') {
+                var transparent = detectTransparency(ctx);
+                if (transparent) {
+                    // Redraw image, doubling the height seems to fix the iOS6 issue.
+                    ctx.drawImage(img, x, y, w, h * 2.041);
+                }
             }
 
             // Notify listeners of scaled and cropped image.
@@ -215,64 +219,15 @@
         }
 
         /**
-         * Detect subsampling in loaded image.
-         * In iOS, larger images than 2M pixels may be subsampled in rendering.
-         */
-        function detectSubsampling(img) {
-            var iw = img.naturalWidth, ih = img.naturalHeight;
-            if (iw * ih > 1024 * 1024) { // subsampling may happen over megapixel image
-                var canvas = document.createElement('canvas');
-                canvas.width = canvas.height = 1;
-                var ctx = canvas.getContext('2d');
-                ctx.drawImage(img, -iw + 1, 0);
-                // subsampled image becomes half smaller in rendering size.
-                // check alpha channel value to confirm image is covering edge pixel or not.
-                // if alpha value is 0 image is not covering, hence subsampled.
-                return ctx.getImageData(0, 0, 1, 1).data[3] === 0;
-            } else {
-                return false;
-            }
-        }
-
-        /**
-         * Detecting vertical squash in loaded image.
-         * Fixes a bug which squash image vertically while drawing into canvas for some images.
-         *
-         * @return Number vertical squash scale
-         */
-        function detectVerticalSquash(ctx) {
-            var canvas = ctx.canvas;
-            var ih = canvas.height;
-
-            // Returns pixel data for the specified rectangle.
-            var data = ctx.getImageData(0, 0, 1, ih).data;
-            // Search image edge pixel position in case it is squashed vertically.
-            var sy = 0;
-            var ey = ih;
-            var py = ih;
-            while (py > sy) {
-                var alpha = data[(py - 1) * 4 + 3];
-                if (alpha === 0) {
-                    ey = py;
-                } else {
-                    sy = py;
-                }
-                py = (ey + sy) >> 1;
-            }
-            return py / ih;
-        }
-
-        /**
          * Detect transparency.
          * Fixes a bug which squash image vertically while drawing into canvas for some images.
          *
          * @param ctx HTMLCanvasElement Canvas
          * @return Boolean True als transparent
          */
-        function detectTransparancy(ctx) {
+        function detectTransparency(ctx) {
             var canvas = ctx.canvas;
             var height = canvas.height;
-            var width = canvas.width;
 
             // Returns pixel data for the specified rectangle.
             var data = ctx.getImageData(0, 0, 1, height).data;
@@ -284,45 +239,7 @@
                     return true;
                 }
             }
-
-//            // Returns pixel data for the specified rectangle.
-//            data = ctx.getImageData(0, 0, width, 1).data;
-//
-//            // Search image edge pixel position in case it is squashed vertically.
-//            for (i=0; i < width; i++) {
-//                alphaPixel = data[(i * 4) + 3];
-//                if (alphaPixel == 0) {
-//                    return true;
-//                }
-//            }
-
             return false;
-        }
-
-        /**
-         * Detecting vertical squash in loaded image.
-         * Fixes a bug which squash image vertically while drawing into canvas for some images.
-         *
-         * @param ctx HTMLCanvasElement Canvas
-         * @return Number Vertical squash scale
-         */
-        function detectVerticalSquash3(ctx) {
-            var canvas = ctx.canvas;
-            var height = canvas.height;
-
-            // Returns pixel data for the specified rectangle.
-            var data = ctx.getImageData(0, 0, 1, height).data;
-
-            // Search image edge pixel position in case it is squashed vertically.
-            var i = 1;
-            for (; i < height; i++) {
-                var alphaPixel = data[((i - 1) * 4) + 3];
-                if (alphaPixel > 0) {
-                    break;
-                }
-            }
-
-            return (height - i) / height;
         }
 
         /**
@@ -465,6 +382,7 @@
             }
 
             var img = document.createElement("img");
+            $(img).data('fileType', file.type);
 
             if (window.FileReader) {
                 var reader = new FileReader();
