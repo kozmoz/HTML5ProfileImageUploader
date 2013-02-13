@@ -32,6 +32,10 @@
                     possibilities, available in every modern browser.
                 </p>
 
+                <p>
+                    <a href="http://blog.avisi.nl/2013/02/13/html5-drag-n-drop-photo/" target="_blank">http://blog.avisi.nl/2013/02/13/html5-drag-n-drop-photo/</a>
+                </p>
+
                 <h3>Live Demo</h3>
 
                 <p>Files are automatically uploaded as soon as they are added, no files are stored on the server.</p>
