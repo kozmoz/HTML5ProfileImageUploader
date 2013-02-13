@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta charset="utf-8"/>
 
-    <title>HTML5 Image Uploader</title>
+    <title>HTML5 photo upload</title>
 
     <link href="css/bootstrap-2.3.min.css" rel="stylesheet" type="text/css"/>
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
@@ -16,23 +16,23 @@
 <div class="container">
     <section id="global">
         <div class="page-header">
-            <h1>HTML5 image uploader
-                <small>crop and scale image client side</small>
-            </h1>
+            <h1>HTML5 photo upload</h1>
         </div>
         <div class="row">
             <div class="span12">
 
-                <p>
-                    jQuery plugin to crop, scale and upload an image. It croppes the image at the predefined perspective and scales it down to fit best automatically. For efficientness, cropping and scaling is performed client side at the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's possibilities, available in
-                    every modern browser.
+                <p class="lead">
+                    Drag 'n drop your photo (and leave the technical details to us)
                 </p>
 
                 <p>
-                    <a href="http://www.juurlink.org/todo/">http://www.juurlink.org/todo/</a>
+                    HTML5 photo upload is a jQuery plugin to crop, scale and upload an image. It croppes the selected image at the predefined
+                    resolution and scales it down to fit automatically. For efficiency, cropping and scaling is performed at the client
+                    side in the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's
+                    possibilities, available in every modern browser.
                 </p>
 
-                <h2>Online Demo</h2>
+                <h3>Live Demo</h3>
 
                 <form>
                     <fieldset>
