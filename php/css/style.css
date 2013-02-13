@@ -19,9 +19,6 @@ h2 {
 
 .media-drop-placeholder {
     display: table-cell;
-    /* Scale 1.11 */
-    width: 640px;
-    height: 480px;
     background-color: #e1e1e8;
     border: 3px solid #e1e1e8;
     -webkit-border-radius: 3px;

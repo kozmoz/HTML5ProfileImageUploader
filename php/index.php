@@ -26,13 +26,15 @@
                 </p>
 
                 <p>
-                    HTML5 photo upload is a jQuery plugin to crop, scale and upload an image. It croppes the selected image at the predefined
-                    resolution and scales it down to fit automatically. For efficiency, cropping and scaling is performed at the client
-                    side in the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's
+                    HTML5 photo upload is a jQuery plugin to crop, scale and upload an image. It croppes the dropped or selected image at the predefined
+                    resolution and scales it down to fit automatically. For efficiency, cropping and scaling is performed on the browser side. The
+                    resulting image is uploaded to the server through an asynchronous call. This plugin exploits all of HTML5's
                     possibilities, available in every modern browser.
                 </p>
 
                 <h3>Live Demo</h3>
+
+                <p>Files are automatically uploaded as soon as they are added, no files are stored on the server.</p>
 
                 <form>
                     <fieldset>
@@ -55,7 +57,7 @@
                     <!-- Image placeholder. -->
                     <div id="droppedimage"></div>
 
-                    <div id="dropbox" class="media-drop-placeholder">
+                    <div id="dropbox" class="media-drop-placeholder" style="width: 640px; height: 480px">
                         <span class="media-drop-placeholder-title">Drop image here</span>
                         <span class="media-drop-placeholder-or">or</span>
 

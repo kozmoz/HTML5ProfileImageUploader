@@ -6,10 +6,9 @@ Introduction
 
 Drag 'n drop your photo (and leave the technical details to us)
 
-HTML5 photo upload is a jQuery plugin to crop, scale and upload an image. It croppes the selected image at the predefined
-resolution and scales it down to fit automatically. For efficiency, cropping and scaling is performed at the client
-side in the browser. The resulting image is uploaded to the server through an asynchronous call. It exploits all of HTML5's
-possibilities, available in every modern browser.
+HTML5 photo upload is a jQuery plugin to crop, scale and upload an image. It croppes the dropped or selected image at the predefined
+resolution and scales it down to fit automatically. For efficiency, cropping and scaling is performed on the browser side. The
+resulting image is uploaded to the server through an asynchronous call. This plugin exploits all of HTML5's possibilities, available in every modern browser.
 
 Files are automatically uploaded as soon as they are added, no files are stored on the server.
 
