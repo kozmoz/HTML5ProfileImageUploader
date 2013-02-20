@@ -25,7 +25,7 @@ http://sandbox.juurlink.org/html5imageupload/
 
 Blog
 ----
-http://www.juurlink.org/2013/02/html5-drag-n-drop-photo/ ‎
+http://blog.avisi.nl/2013/02/13/html5-drag-n-drop-photo/
 
 Compatibility
 -------------
