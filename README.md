@@ -21,7 +21,7 @@ Key features
 
 Demo
 ----
-http://sandbox.juurlink.org/html5imageupload/
+http://sandbox.juurlink.org/html5imageuploader/
 
 Blog
 ----
